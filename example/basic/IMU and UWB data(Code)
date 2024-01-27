@@ -1,0 +1,26 @@
+% Define the data
+sample = [1, 2, 3, 4, 5];
+imuX = [0.4170, 0.1469, 0.0923, 0.1867, 0.3968];
+imuY = [0.7203, 0.0923, 0.0462, 0.3968, 0.5383];
+imuZ = [0.0001, 0.1863, 0.3456, 0.5383, 0.4170];
+uwbData = [0.3023, 0.6822, 0.5417, 0.1509, 0.6970];
+
+% Plot IMU data
+figure;
+subplot(2, 1, 1);
+plot(sample, imuX, 'o-', 'DisplayName', 'IMU Data (X)');
+hold on;
+plot(sample, imuY, 's-', 'DisplayName', 'IMU Data (Y)');
+plot(sample, imuZ, '^-', 'DisplayName', 'IMU Data (Z)');
+xlabel('Sample');
+ylabel('IMU Data');
+legend;
+title('IMU Data');
+
+% Plot UWB data
+subplot(2, 1, 2);
+plot(sample, uwbData, 'o-', 'DisplayName', 'UWB Data');
+xlabel('Sample');
+ylabel('UWB Data');
+legend;
+title('UWB Data');
