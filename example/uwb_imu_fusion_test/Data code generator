@@ -1,0 +1,56 @@
+% Parameters
+imu_frequency = 100; % or 200 Hz for IMU
+uwb_frequency = 10; % Hz for UWB
+duration = 30; % seconds for each section
+rest_duration = 30; % seconds for rest
+
+% Generate time vector
+time_vector = 0:1/imu_frequency:duration; % Assuming uniform sampling
+
+% Section lengths
+section_lengths = [13, 2, 1.6, 1.7];
+
+% Generate synthetic data for each section
+imu_data = struct('acceleration', [], 'angular_velocity', []);
+uwb_data = [];
+
+for i = 1:length(section_lengths)
+    % Rest period
+    rest_data = generate_rest_data(imu_frequency, rest_duration);
+    imu_data.acceleration = [imu_data.acceleration, rest_data.acceleration];
+    imu_data.angular_velocity = [imu_data.angular_velocity, rest_data.angular_velocity];
+    
+    % Movement period
+    movement_data = generate_movement_data(imu_frequency, uwb_frequency, section_lengths(i));
+    imu_data.acceleration = [imu_data.acceleration, movement_data.acceleration];
+    imu_data.angular_velocity = [imu_data.angular_velocity, movement_data.angular_velocity];
+    uwb_data = [uwb_data; movement_data.uwb];
+end
+
+% Additional rest period at the end
+rest_data_end = generate_rest_data(imu_frequency, rest_duration);
+imu_data.acceleration = [imu_data.acceleration, rest_data_end.acceleration];
+imu_data.angular_velocity = [imu_data.angular_velocity, rest_data_end.angular_velocity];
+
+% Plotting example
+figure;
+subplot(2,1,1);
+plot(time_vector, imu_data.acceleration);
+title('Accelerometer Data');
+xlabel('Time (s)');
+ylabel('Acceleration (m/s^2)');
+
+subplot(2,1,2);
+plot(time_vector, imu_data.angular_velocity);
+title('Gyroscope Data');
+xlabel('Time (s)');
+ylabel('Angular Velocity (rad/s)');
+
+figure;
+plot(time_vector, uwb_data);
+title('UWB Data');
+xlabel('Time (s)');
+ylabel('Distance (meters)');
+
+% Save data to a file
+save('synthetic_data.mat', 'imu_data', 'uwb_data');
