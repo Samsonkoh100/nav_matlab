@@ -1,0 +1,69 @@
+function [imu_data, uwb_data] = generate_synthetic_data(imu_frequency, uwb_frequency, section_lengths, duration, rest_duration)
+    % Generate time vector
+    time_vector = 0:1/imu_frequency:duration;
+
+    % Initialize data structures
+    imu_data = struct('acceleration', [], 'angular_velocity', []);
+    uwb_data = [];
+
+    for i = 1:length(section_lengths)
+        % Rest period
+        rest_data = generate_rest_data(imu_frequency, rest_duration);
+        imu_data.acceleration = [imu_data.acceleration, rest_data.acceleration];
+        imu_data.angular_velocity = [imu_data.angular_velocity, rest_data.angular_velocity];
+
+        % Movement period
+        movement_data = generate_movement_data(imu_frequency, uwb_frequency, section_lengths(i));
+        imu_data.acceleration = [imu_data.acceleration, movement_data.acceleration];
+        imu_data.angular_velocity = [imu_data.angular_velocity, movement_data.angular_velocity];
+        uwb_data = [uwb_data; movement_data.uwb];
+    end
+
+    % Additional rest period at the end
+    rest_data_end = generate_rest_data(imu_frequency, rest_duration);
+    imu_data.acceleration = [imu_data.acceleration, rest_data_end.acceleration];
+    imu_data.angular_velocity = [imu_data.angular_velocity, rest_data_end.angular_velocity];
+end
+
+function data = generate_rest_data(imu_frequency, duration)
+    time_vector = 0:1/imu_frequency:duration;
+    data.acceleration = zeros(1, length(time_vector));
+    data.angular_velocity = zeros(1, length(time_vector));
+end
+
+function data = generate_movement_data(imu_frequency, uwb_frequency, length)
+    time_vector = 0:1/imu_frequency:length;
+    data.acceleration = randn(1, length(time_vector)); % Simulated accelerometer data
+    data.angular_velocity = randn(1, length(time_vector)); % Simulated gyroscope data
+
+    % Simulated UWB data
+    time_vector_uwb = 0:1/uwb_frequency:length;
+    data.uwb = 0.5 * sin(2 * pi * time_vector_uwb / length) + randn(1, length(time_vector_uwb)) * 0.1;
+end
+
+% Parameters
+imu_frequency = 100;
+uwb_frequency = 10;
+duration = 30;
+rest_duration = 30;
+section_lengths = [13, 2, 1.6, 1.7];
+
+% Generate synthetic data
+[imu_data, uwb_data] = generate_synthetic_data(imu_frequency, uwb_frequency, section_lengths, duration, rest_duration);
+
+% Plotting example
+figure;
+subplot(2, 1, 1);
+plot(imu_data.acceleration);
+title('Accelerometer Data');
+xlabel('Sample');
+ylabel('Acceleration');
+
+subplot(2, 1, 2);
+plot(uwb_data);
+title('UWB Data');
+xlabel('Sample');
+ylabel('Distance');
+
+% Save data to a file
+save('synthetic_data.mat', 'imu_data', 'uwb_data');
